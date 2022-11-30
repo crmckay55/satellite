@@ -35,15 +35,13 @@ class PreProcessing:
         print("Synchronizing Frames...")
         self.frames = self.__reshape(self.raw_signal)
 
+        self.save_image(self.frames, "frames.png")
+
         print("Seperating Frames....")
-        a, b = self.__channel_cropper("F:/Python Projects/Satellite/frameA.png")
+        a, b = self.__channel_cropper("F:/Python Projects/Satellite/frames.png")
+        # lTODO: get a and b into their own PNG files!
 
-
-        self.save_image(a, "cha.png")
-        self.save_image(b, "chb.png")
-
-        self.__colourize()
-
+        self.__colourize(a, b)
 
     def __load_file(self, filepath):
         '''
@@ -154,7 +152,7 @@ class PreProcessing:
 
     def __channel_cropper(self, filename):
         # These were shamelessly taken from aptdec
-        factor = self.target_rate / 2080
+        factor = int(self.target_rate / 2080)
         APT_SYNC_WIDTH = 39 * factor
         APT_SPC_WIDTH = 47 * factor
         APT_TELE_WIDTH = 45 * factor
@@ -162,10 +160,10 @@ class PreProcessing:
         APT_CH_WIDTH = 909 * factor
 
         i = Image.open(filename).convert("L")
-        iar = i.load()
+        #iar = i.load()
         xsize, ysize = i.size
-        cha = Image.new('RGB', (APT_CH_WIDTH, ysize))
-        chb = Image.new('RGB', (APT_CH_WIDTH, ysize))
+        #cha = Image.new('RGB', (APT_CH_WIDTH, ysize))
+        #chb = Image.new('RGB', (APT_CH_WIDTH, ysize))
         (left, upper, right, lower) = (
         APT_SYNC_WIDTH + APT_SPC_WIDTH, 1, APT_SYNC_WIDTH + APT_SPC_WIDTH + APT_CH_WIDTH - 10, ysize)
         cha = i.crop((left, upper, right, lower))
@@ -177,13 +175,13 @@ class PreProcessing:
         chb = i.crop((left, upper, right, lower))
 
         # chb.show()
-
-        cha = cha.resize((909 * factor, ysize), Image.ANTIALIAS)
-        chb = chb.resize((909 * factor, ysize), Image.ANTIALIAS)
+        print(APT_CH_WIDTH, ysize)
+        cha = cha.resize((APT_CH_WIDTH, ysize), Image.ANTIALIAS)
+        chb = chb.resize((APT_CH_WIDTH, ysize), Image.ANTIALIAS)
 
         return cha, chb
 
-    def __colourize(self):
+    def __colourize(self, ch2, ch4):
         args = list(sys.argv)
 
         try:
@@ -200,8 +198,8 @@ class PreProcessing:
                 args.append("-noboost")
 
         # images
-        ch2 = Image.open("F:/Python Projects/Satellite/cha.png").convert("L")
-        ch4 = Image.open("F:/Python Projects/Satellite/chb.png").convert("L")
+        #ch2 = Image.open("F:/Python Projects/Satellite/cha.png").convert("L")
+        #ch4 = Image.open("F:/Python Projects/Satellite/chb.png").convert("L")
 
         # ch4 = PIL.ImageOps.invert(ch4)
         # ch4 = PIL.ImageOps.autocontrast(ch4)
